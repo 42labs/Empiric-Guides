@@ -1,13 +1,13 @@
 import asyncio
 import json
-from starknet_py.net import AccountClient
-from starknet_py.contract import Contract
-from starknet_py.net.gateway_client import GatewayClient
-from starknet_py.transactions.declare import make_declare_tx
-from starkware.starknet.compiler.compile import get_selector_from_name
 
+from starknet_py.contract import Contract
+from starknet_py.net import AccountClient
+from starknet_py.net.gateway_client import GatewayClient
 # Local network
 from starknet_py.net.models import StarknetChainId
+from starknet_py.transactions.declare import make_declare_tx
+from starkware.starknet.compiler.compile import get_selector_from_name
 
 
 async def setup_accounts():
@@ -21,12 +21,16 @@ async def setup_accounts():
     return local_network_client, account_client
 
 
+async def declare_contract(admin_client, contract_src):
+    declare_tx = make_declare_tx(compilation_source=[contract_src])
+    return await admin_client.declare(declare_tx)
+
+
 async def setup_contracts(network_client, admin_client):
     # Declare implementation contract
-    declare_tx = make_declare_tx(
-        compilation_source=["contracts/Implementation_v0.cairo"]
+    declaration_result = await declare_contract(
+        admin_client, "contracts/Implementation_v0.cairo"
     )
-    declaration_result = await admin_client.declare(declare_tx)
 
     # Deploy proxy and call initializer in the constructor
     deployment_result = await Contract.deploy(
@@ -55,8 +59,7 @@ async def setup_contracts(network_client, admin_client):
 
 async def upgrade_proxy(admin_client, proxy_contract, new_contract_src):
     # Declare implementation contract
-    declare_tx = make_declare_tx(compilation_source=[new_contract_src])
-    declaration_result = await admin_client.declare(declare_tx)
+    declaration_result = await declare_contract(admin_client, new_contract_src)
 
     # Upgrade contract
     call = proxy_contract.functions["upgrade"].prepare(
