@@ -4,6 +4,7 @@ import json
 from starknet_py.contract import Contract
 from starknet_py.net import AccountClient
 from starknet_py.net.gateway_client import GatewayClient
+
 # Local network
 from starknet_py.net.models import StarknetChainId
 from starknet_py.transactions.declare import make_declare_tx
