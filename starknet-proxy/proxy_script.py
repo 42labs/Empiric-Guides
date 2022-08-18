@@ -12,9 +12,7 @@ from starkware.starknet.compiler.compile import get_selector_from_name
 
 
 async def setup_accounts():
-    local_network_client = GatewayClient(
-        "http://localhost:5050", chain=StarknetChainId.TESTNET
-    )
+    local_network_client = GatewayClient("http://localhost:5050")
     # Deploys an account on devnet and returns an instance
     account_client = await AccountClient.create_account(
         client=local_network_client, chain=StarknetChainId.TESTNET
